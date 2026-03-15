@@ -1,0 +1,20 @@
+{
+  "name": "@maber/utils",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@maber/config": "workspace:*",
+    "typescript": "^5.8.0"
+  }
+}

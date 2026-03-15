@@ -1,0 +1,5 @@
+{
+  "extends": "@maber/config/typescript/svelte",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
