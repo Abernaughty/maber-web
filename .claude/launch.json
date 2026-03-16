@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pcpc (dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@maber/pcpc", "dev", "--", "--port", "5173"],
+      "port": 5173
+    },
+    {
+      "name": "blackjack (dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@maber/blackjack", "dev", "--", "--port", "5174"],
+      "port": 5174
+    },
+    {
+      "name": "landing (dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@maber/landing", "dev", "--", "--port", "5175"],
+      "port": 5175
+    },
+    {
+      "name": "portfolio (dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@maber/portfolio", "dev", "--", "--port", "5176"],
+      "port": 5176
+    },
+    {
+      "name": "all apps (turbo dev)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 5173
+    }
+  ]
+}
