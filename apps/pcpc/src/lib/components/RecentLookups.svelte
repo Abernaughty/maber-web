@@ -5,12 +5,14 @@
   import { cardsStore } from '$lib/stores/cards.svelte';
   import { pricingStore } from '$lib/stores/pricing.svelte';
 
-  interface RecentLookup {
+  export interface RecentLookup {
     setId: string;
     cardId: string;
     name: string;
     imageUrl: string | null;
     setName: string;
+    /** Language filter needed to find this set ('en' | 'jp' | 'both'). */
+    language?: string;
   }
 
   const STORAGE_KEY = 'pcpc_recent_lookups';
@@ -36,7 +38,50 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lookups)); } catch {}
   }
 
+  function removeLookup(lookup: RecentLookup): void {
+    lookups = lookups.filter((l) => !(l.setId === lookup.setId && l.cardId === lookup.cardId));
+    persist();
+  }
+
+  /**
+   * Ensure the language filter includes the set we need.
+   * Uses the stored language from the lookup entry, falling back to
+   * heuristic detection from the set ID.
+   */
+  async function ensureLanguageForSet(lookup: RecentLookup): Promise<void> {
+    const currentLang = setsStore.language;
+
+    // Determine what language this set needs
+    const needsJp = lookup.language === 'jp' || lookup.language === 'both'
+      || lookup.setId.endsWith('_ja') || lookup.setId.includes('_ja_') || lookup.setId.includes('_ja-');
+    const needsEn = !needsJp;
+
+    // If current filter already covers this set, nothing to do
+    if (currentLang === 'both') return;
+    if (needsJp && currentLang === 'jp') return;
+    if (needsEn && currentLang === 'en') return;
+
+    // Switch to 'both' to cover both languages
+    await setsStore.setLanguage('both');
+  }
+
+  /**
+   * Find a set by ID in the current store data.
+   */
+  function findSetInStore(setId: string): import('$lib/types').PokemonSet | null {
+    const direct = setsStore.availableSets.find((s) => s.id === setId);
+    if (direct) return direct;
+    for (const group of setsStore.groupedSetsForDropdown) {
+      if (group.type === 'group') {
+        const found = group.items.find((s) => s.id === setId);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
   async function handleChipClick(lookup: RecentLookup): Promise<void> {
+    // If the set is already selected, just find the card in the current list
     const currentSetId = setsStore.selectedSet?.id;
     if (currentSetId === lookup.setId) {
       const card = cardsStore.cardsInSet.find((c) => c.id === lookup.cardId);
@@ -48,15 +93,18 @@
       }
       return;
     }
-    const allSets = setsStore.groupedSetsForDropdown;
-    let targetSet = null;
-    for (const group of allSets) {
-      if (group.type === 'group') {
-        const found = group.items.find((s) => s.id === lookup.setId);
-        if (found) { targetSet = found; break; }
-      }
+
+    // Try to find the set in current store data
+    let targetSet = findSetInStore(lookup.setId);
+
+    // If not found, switch language filter and retry
+    if (!targetSet) {
+      await ensureLanguageForSet(lookup);
+      targetSet = findSetInStore(lookup.setId);
     }
+
     if (!targetSet) return;
+
     await setsStore.selectSet(targetSet);
     const card = cardsStore.cardsInSet.find((c) => c.id === lookup.cardId);
     if (card) {
@@ -74,7 +122,7 @@
   <div class="recent-lookups">
     <div class="recent-header">
       <span class="recent-label">RECENT</span>
-      <button class="clear-btn" onclick={handleRemoveAll} type="button" aria-label="Clear recent lookups">Clear</button>
+      <button class="clear-btn" onclick={handleRemoveAll} type="button" aria-label="Clear recent lookups">clear</button>
     </div>
     <div class="chips-scroll">
       {#each lookups as lookup (`${lookup.setId}_${lookup.cardId}`)}
@@ -85,6 +133,14 @@
             <span class="chip-thumb-placeholder"></span>
           {/if}
           <span class="chip-name">{lookup.name}</span>
+          <span
+            class="chip-remove"
+            role="button"
+            tabindex="-1"
+            aria-label="Remove {lookup.name} from recent"
+            onclick={(e) => { e.stopPropagation(); removeLookup(lookup); }}
+            onkeydown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); removeLookup(lookup); } }}
+          >&#x00D7;</span>
         </button>
       {/each}
     </div>
@@ -93,19 +149,22 @@
 
 <style>
   .recent-lookups { margin-bottom: 16px; }
-  .recent-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .recent-label { font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-  .clear-btn { background: none; border: none; font-size: var(--fs-micro); color: var(--text-dim); cursor: pointer; padding: 2px 6px; border-radius: 3px; transition: color 0.15s ease, background-color 0.15s ease; }
-  .clear-btn:hover { color: var(--text-secondary); background-color: rgba(255, 255, 255, 0.04); }
+  .recent-header { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 8px; }
+  .recent-label { font-size: var(--fs-micro); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1; }
+  .clear-btn { background: none; border: none; font-size: 9px; color: var(--text-dim); cursor: pointer; padding: 0 2px; border-radius: 3px; transition: color 0.15s ease; text-transform: lowercase; letter-spacing: 0.3px; line-height: 1; }
+  .clear-btn:hover { color: var(--text-muted); }
   .chips-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; scrollbar-color: var(--border-subtle) transparent; position: relative; -webkit-overflow-scrolling: touch; }
   .chips-scroll::-webkit-scrollbar { height: 3px; }
   .chips-scroll::-webkit-scrollbar-track { background: transparent; }
   .chips-scroll::-webkit-scrollbar-thumb { background-color: var(--border-subtle); border-radius: 3px; }
-  .lookup-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px 5px 6px; background-color: var(--surface-2); border: 1px solid var(--border-subtle); border-radius: var(--radius-input); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: border-color 0.15s ease, background-color 0.15s ease; min-height: 36px; }
+  .lookup-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px 5px 6px; background-color: var(--surface-2); border: 1px solid var(--border-subtle); border-radius: var(--radius-input); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: border-color 0.15s ease, background-color 0.15s ease; min-height: 36px; position: relative; }
   .lookup-chip:hover { border-color: rgba(255, 255, 255, 0.1); background-color: rgba(255, 255, 255, 0.03); }
   .chip-thumb { width: 18px; height: 25px; object-fit: cover; border-radius: 2px; flex-shrink: 0; }
   .chip-thumb-placeholder { width: 18px; height: 25px; background-color: rgba(255, 255, 255, 0.04); border-radius: 2px; flex-shrink: 0; }
   .chip-name { font-size: var(--fs-badge); font-weight: 500; color: var(--text-secondary); max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-  @media (max-width: 768px) { .lookup-chip { min-height: 44px; padding: 8px 10px 8px 6px; } .chip-name { max-width: 100px; } }
+  .chip-remove { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; font-size: 11px; line-height: 1; color: var(--text-dim); border-radius: 50%; flex-shrink: 0; opacity: 0; transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease; cursor: pointer; margin-left: -2px; }
+  .chip-remove:hover { color: var(--text-primary); background-color: rgba(255, 255, 255, 0.08); }
+  .lookup-chip:hover .chip-remove { opacity: 1; }
+  @media (max-width: 768px) { .lookup-chip { min-height: 44px; padding: 8px 10px 8px 6px; } .chip-name { max-width: 100px; } .chip-remove { opacity: 1; } }
   @media (max-width: 480px) { .chip-name { max-width: 80px; font-size: var(--fs-micro); } }
 </style>
