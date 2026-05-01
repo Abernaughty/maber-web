@@ -29,7 +29,7 @@
 	<p>{description}</p>
 
 	<div class="tech-stack">
-		{#each techStack as tech}
+		{#each techStack as tech (tech)}
 			<span class="tech-tag">{tech}</span>
 		{/each}
 	</div>

@@ -15,8 +15,6 @@ import {
 import { createShuffledDeck, drawCard } from './deck';
 import {
 	calculateHandValue,
-	isBlackjack,
-	isBust,
 	canSplit as checkCanSplit,
 	canDouble as checkCanDouble,
 	getDealerMaskedValue

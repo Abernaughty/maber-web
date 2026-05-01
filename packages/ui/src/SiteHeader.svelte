@@ -21,7 +21,7 @@
 		</a>
 		{#if links.length > 0}
 			<ul class="flex items-center gap-6">
-				{#each links as link}
+				{#each links as link (link.href)}
 					<li>
 						<a
 							href={link.href}
