@@ -50,7 +50,7 @@
 	{/if}
 
 	<div class="cards">
-		{#each cards as card, i}
+		{#each cards as card, i (i)}
 			<Card {card} faceDown={dealerMasked && i === 1} />
 		{/each}
 	</div>
