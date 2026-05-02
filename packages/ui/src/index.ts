@@ -1,6 +1,5 @@
-// Shared UI components for maber-web monorepo
-// Add components here as they are built
-
-export { default as Button } from './Button.svelte';
-export { default as SiteHeader } from './SiteHeader.svelte';
-export { default as SiteFooter } from './SiteFooter.svelte';
+// Reserved for future shared primitives.
+// Stack-pure convention: each app owns its components in apps/<name>/src/lib/components/.
+// Promote to @maber/ui only when real duplication emerges across apps.
+// See apps/portfolio/docs/specs/Portfolio_Redesign_Spec.md §11.
+export {};
