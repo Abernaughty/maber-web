@@ -1,0 +1,135 @@
+/**
+ * Portfolio design tokens — Engineer's Desk
+ *
+ * Dark-only by design (light mode deferred per spec §1). All component styles
+ * consume these tokens — never hardcode color/size/spacing values in component
+ * <style> blocks. See Portfolio_Redesign_Spec.md §2 for the full rationale.
+ */
+
+:root {
+  /* ------------------------------------------------------------------------
+   * Colors — Engineer's Desk palette
+   * ------------------------------------------------------------------------ */
+
+  /* Primary cyan accent. Used for highlights, CTAs, active states, prompts. */
+  --accent: #22d3ee;
+  --accent-dim: rgba(34, 211, 238, 0.4);
+  --accent-glow: rgba(34, 211, 238, 0.04);
+
+  /* Background tiers — deepest to most-elevated. */
+  --bg: #0a0b0a;
+  --bg-2: #0e0f0d;
+  --panel: #121310;
+  --panel-2: rgba(22, 24, 20, 0.27); /* translucent overlay panel */
+
+  /* Borders — subtle to emphasized. */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Text — primary, secondary, tertiary. */
+  --text: #e6e7e3;
+  --muted: rgba(230, 231, 227, 0.56);
+  --dim: rgba(230, 231, 227, 0.36);
+
+  /* Status indicators. */
+  --status-live: #22c55e; /* "open to work" pulsing dot, live indicators */
+
+  /* ------------------------------------------------------------------------
+   * Typography
+   * ------------------------------------------------------------------------ */
+
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', 'IBM Plex Mono',
+    ui-monospace, Menlo, monospace;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+
+  /* Type scale — see spec §2 Type scale. */
+  --fs-micro: 11px; /* uppercase labels, metadata */
+  --fs-small: 13px; /* secondary body text */
+  --fs-base: 15px; /* primary body text */
+  --fs-lg: 18px; /* subheadings */
+  --fs-xl: 28px; /* section labels */
+  --fs-2xl: 56px; /* section headings */
+  --fs-hero: 132px; /* Hero name (responsive — see clamp below) */
+
+  /* Responsive Hero scaling. clamp ensures it never overflows on mobile. */
+  --fs-hero-fluid: clamp(64px, 12vw, 132px);
+
+  /* Line heights. */
+  --lh-tight: 1.05;
+  --lh-snug: 1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+
+  /* Font weights. Keep 400/500/600/700/800 — variable font handles in-between. */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+
+  /* Letter spacing — used for uppercase labels and hero treatment. */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-label: 0.18em; /* uppercase metadata labels */
+
+  /* ------------------------------------------------------------------------
+   * Spacing — 8px grid; multiples of 4px when finer control is needed
+   * ------------------------------------------------------------------------ */
+
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ------------------------------------------------------------------------
+   * Layout
+   * ------------------------------------------------------------------------ */
+
+  --layout-max-width: 1240px;
+  --topbar-height: 33px;
+  --nav-height: 56px;
+  --section-pad-y: 100px;
+  --section-pad-x: 32px;
+
+  /* Mobile section padding override (consumed via @media in app.css). */
+  --section-pad-x-mobile: 16px;
+  --section-pad-y-mobile: 64px;
+
+  /* ------------------------------------------------------------------------
+   * Effects
+   * ------------------------------------------------------------------------ */
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --blur-backdrop: blur(8px);
+
+  --transition-fast: 160ms ease;
+  --transition-normal: 240ms ease;
+
+  /* Shadows are sparingly used in the Engineer's Desk aesthetic. Reserve for
+   * floating UI (CommandPalette, modals) and subtle elevation cues. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+
+  /* ------------------------------------------------------------------------
+   * Z-index — keep the stacking context explicit
+   * ------------------------------------------------------------------------ */
+
+  --z-base: 0;
+  --z-content: 10;
+  --z-nav: 50;
+  --z-topbar: 60;
+  --z-overlay: 80;
+  --z-modal: 100;
+}
