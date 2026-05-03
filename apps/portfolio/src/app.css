@@ -25,6 +25,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Native hash anchors land below the sticky TopBar+Nav rather than
+     * under them. Smooth-scroll JS uses its own offset; this is only the
+     * fallback path (full-reload + hash, browser-native scroll). */
+    scroll-padding-top: calc(
+      var(--topbar-height) + var(--nav-height) + var(--space-2)
+    );
   }
 
   html,

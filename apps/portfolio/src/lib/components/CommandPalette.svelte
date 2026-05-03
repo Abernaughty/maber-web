@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { SECTIONS, type Section } from '$lib/constants/sections';
 	import { smoothScrollTo } from '$lib/hooks/useSmoothScroll.svelte';
 
@@ -48,9 +50,14 @@
 
 	function jump(section: Section) {
 		close();
-		// Wait one frame for the modal to unmount before scrolling so focus
-		// returns cleanly to the page body.
-		requestAnimationFrame(() => smoothScrollTo(section.id));
+		// On the homepage, smooth-scroll to the section. From a deep-dive
+		// route, navigate home with the hash so SvelteKit routes us back and
+		// scrolls to the section after the page mounts.
+		if (page.url.pathname === '/') {
+			requestAnimationFrame(() => smoothScrollTo(section.id));
+		} else {
+			goto(`/#${section.id}`);
+		}
 	}
 
 	function handleKey(event: KeyboardEvent) {

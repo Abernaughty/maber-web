@@ -17,6 +17,10 @@
 	let { children }: { children: Snippet } = $props();
 
 	let paletteOpen = $state(false);
+
+	// Cross-route hash scroll: handled by CSS `scroll-padding-top` on `html`
+	// (see app.css). Browsers honor that during native hash navigation so
+	// `#section` lands below the sticky TopBar+Nav rather than under it.
 </script>
 
 <div class="app">

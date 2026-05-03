@@ -10,9 +10,11 @@
 	 * translucent bg with backdrop blur.
 	 */
 
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { SECTIONS, SECTION_IDS } from '$lib/constants/sections';
 	import { useActiveSection } from '$lib/hooks/useActiveSection.svelte';
-	import { smoothScrollHandler } from '$lib/hooks/useSmoothScroll.svelte';
+	import { smoothScrollTo } from '$lib/hooks/useSmoothScroll.svelte';
 
 	interface Props {
 		/** Bound from layout — opens the CommandPalette on ⌘K click. */
@@ -21,6 +23,10 @@
 
 	let { paletteOpen = $bindable(false) }: Props = $props();
 
+	// Active-section scroll-spy is only meaningful on the homepage. On deep-
+	// dive routes the sections don't exist, so the hook returns null and no
+	// link is highlighted.
+	const onHome = $derived(page.url.pathname === '/');
 	const activeSection = useActiveSection(SECTION_IDS);
 
 	// Mac vs Windows/Linux key glyph in the ⌘K button hint.
@@ -33,10 +39,28 @@
 
 	function scrollToTop(event: Event) {
 		event.preventDefault();
+		if (!onHome) {
+			goto('/');
+			return;
+		}
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 		if (history.replaceState) {
 			history.replaceState(null, '', window.location.pathname);
 		}
+	}
+
+	function sectionHandler(id: string) {
+		return (event: Event) => {
+			// On the homepage, intercept and do a smooth scroll. From any other
+			// route, let the browser navigate to /#id — SvelteKit routes home
+			// and the hash brings us to the right section.
+			if (!onHome) return;
+			event.preventDefault();
+			smoothScrollTo(id);
+			if (history.replaceState) {
+				history.replaceState(null, '', `#${id}`);
+			}
+		};
 	}
 </script>
 
@@ -51,9 +75,9 @@
 			{#each SECTIONS as section (section.id)}
 				<li>
 					<a
-						href="#{section.id}"
-						class:active={activeSection.active === section.id}
-						onclick={smoothScrollHandler(section.id)}
+						href={onHome ? `#${section.id}` : `/#${section.id}`}
+						class:active={onHome && activeSection.active === section.id}
+						onclick={sectionHandler(section.id)}
 					>
 						<span class="bracket">[</span>
 						<span class="label">{section.label}</span>
