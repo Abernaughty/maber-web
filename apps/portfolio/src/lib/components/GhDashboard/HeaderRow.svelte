@@ -1,16 +1,24 @@
 <script lang="ts">
 	/**
-	 * GhDashboard header line: `$ gh status ── @Abernaughty · N repos · M
-	 * followers · ● live`
+	 * GhDashboard header line: `$ gh status ── @login · N repos · M followers
+	 * · ● live`.
 	 *
-	 * Phase 1 stub — renders the literal `$ gh status` prompt + skeletons for
-	 * the dynamic metadata. Phase 2 swaps the skeletons for live values from
-	 * the server-side GraphQL fetch.
+	 * When `user` is null the row falls back to skeleton placeholders and the
+	 * live-dot turns grey/amber per `status` so the degraded state is
+	 * visually distinct from "still loading."
 	 *
 	 * Spec: §4 Modules → Header row.
 	 */
 
 	import Skeleton from './Skeleton.svelte';
+	import type { GhUser } from '$lib/server/github';
+
+	interface Props {
+		user: GhUser | null;
+		status: 'live' | 'error';
+	}
+
+	const { user, status }: Props = $props();
 </script>
 
 <div class="header">
@@ -20,15 +28,23 @@
 	</span>
 	<span class="separator" aria-hidden="true">──</span>
 	<span class="meta">
-		<Skeleton width="80px" />
+		{#if user}
+			<span class="login"><span class="at">@</span>{user.login}</span>
+			<span class="dim">·</span>
+			<span>{user.repoCount} repos</span>
+			<span class="dim">·</span>
+			<span>{user.followerCount} followers</span>
+		{:else}
+			<Skeleton width="80px" />
+			<span class="dim">·</span>
+			<Skeleton width="60px" />
+			<span class="dim">·</span>
+			<Skeleton width="80px" />
+		{/if}
 		<span class="dim">·</span>
-		<Skeleton width="60px" />
-		<span class="dim">·</span>
-		<Skeleton width="80px" />
-		<span class="dim">·</span>
-		<span class="live" aria-label="data freshness pending">
+		<span class="live status-{status}" aria-label="data freshness {status}">
 			<span class="dot" aria-hidden="true"></span>
-			<span class="label">loading</span>
+			<span class="label">{status === 'live' ? 'live' : 'degraded'}</span>
 		</span>
 	</span>
 </div>
@@ -69,6 +85,14 @@
 		color: var(--dim);
 	}
 
+	.login {
+		color: var(--text);
+	}
+
+	.at {
+		color: var(--accent);
+	}
+
 	.live {
 		display: inline-flex;
 		align-items: center;
@@ -80,6 +104,15 @@
 		height: 6px;
 		border-radius: 50%;
 		background: var(--dim);
+	}
+
+	.live.status-live .dot {
+		background: var(--status-live);
+		box-shadow: 0 0 6px var(--status-live);
+	}
+
+	.live.status-error .dot {
+		background: #f59e0b;
 	}
 
 	.label {

@@ -32,6 +32,14 @@
 	import Caret from './Caret.svelte';
 	import TerminalPrompt from './TerminalPrompt.svelte';
 	import GhDashboard from './GhDashboard/GhDashboard.svelte';
+	import type { GhFetchResult } from '$lib/server/github';
+
+	interface Props {
+		/** Result of the server-side GitHub fetch — null is treated as failure. */
+		gh?: GhFetchResult;
+	}
+
+	const { gh }: Props = $props();
 
 	// Typed lines stagger so the sequence reads as a terminal session rather
 	// than parallel streams. Story uses a slightly slower charDelay so the
@@ -99,7 +107,7 @@
 		</div>
 
 		<div class="dashboard-wrap">
-			<GhDashboard />
+			<GhDashboard data={gh?.ok ? gh.data : null} status={gh?.ok ? 'live' : 'error'} />
 		</div>
 	</div>
 </section>

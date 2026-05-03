@@ -5,9 +5,9 @@
 	 * Replaces the static "stats strip" with live GitHub data — the dashboard
 	 * IS the proof, eliminating the need for a separate proof strip section.
 	 *
-	 * Phase 1: every module renders skeleton placeholders. The visual layout
-	 * is locked in here so Phase 2 just swaps skeletons for live values from
-	 * a single server-side GraphQL fetch (see spec §4 Data layer).
+	 * Receives `data` from the server load (see +page.server.ts). When data
+	 * is null the fetch failed at the edge and every module shows its
+	 * skeleton; the HeaderRow flips its live-dot to amber/grey via `status`.
 	 *
 	 * Spec: §4 GhDashboard.
 	 */
@@ -17,18 +17,26 @@
 	import TopRepos from './TopRepos.svelte';
 	import RecentActivity from './RecentActivity.svelte';
 	import LanguagesBar from './LanguagesBar.svelte';
+	import type { GhDashboardData } from '$lib/server/github';
+
+	interface Props {
+		data: GhDashboardData | null;
+		status: 'live' | 'error';
+	}
+
+	const { data, status }: Props = $props();
 </script>
 
 <section class="dashboard" aria-label="GitHub activity dashboard">
-	<HeaderRow />
+	<HeaderRow user={data?.user ?? null} {status} />
 	<div class="heatmap-wrap">
-		<ContribHeatmap />
+		<ContribHeatmap days={data?.contribDays ?? null} />
 	</div>
 	<div class="grid">
-		<TopRepos />
-		<RecentActivity />
+		<TopRepos repos={data?.topRepos ?? null} />
+		<RecentActivity events={data?.recentActivity ?? null} />
 	</div>
-	<LanguagesBar />
+	<LanguagesBar langs={data?.languages ?? null} />
 </section>
 
 <style>
