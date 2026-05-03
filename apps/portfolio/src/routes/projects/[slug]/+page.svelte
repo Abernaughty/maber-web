@@ -8,6 +8,8 @@
 	 */
 
 	import type { PageData } from './$types';
+	import { NAME } from '$lib/constants/identity';
+	import { SITE_URL } from '$lib/constants/site';
 	import PitchSection from '$lib/components/ProjectDeepDive/PitchSection.svelte';
 	import DemoButton from '$lib/components/ProjectDeepDive/DemoButton.svelte';
 	import ArchitectureSection from '$lib/components/ProjectDeepDive/ArchitectureSection.svelte';
@@ -15,11 +17,21 @@
 	import CodeSection from '$lib/components/ProjectDeepDive/CodeSection.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	const pageTitle = $derived(`${data.deepdive.title} — ${NAME}`);
+	const pageUrl = $derived(`${SITE_URL}/projects/${data.deepdive.slug}`);
 </script>
 
 <svelte:head>
-	<title>{data.deepdive.title} — Mike Abernathy</title>
+	<title>{pageTitle}</title>
 	<meta name="description" content={data.deepdive.summary} />
+	<link rel="canonical" href={pageUrl} />
+	<meta property="og:title" content={pageTitle} />
+	<meta property="og:description" content={data.deepdive.summary} />
+	<meta property="og:url" content={pageUrl} />
+	<meta property="og:type" content="article" />
+	<meta name="twitter:title" content={pageTitle} />
+	<meta name="twitter:description" content={data.deepdive.summary} />
 </svelte:head>
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
