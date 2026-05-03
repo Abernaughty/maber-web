@@ -22,7 +22,7 @@
     {
       "name": "portfolio (dev)",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@maber/portfolio", "dev", "--", "--port", "5176"],
+      "runtimeArgs": ["--filter", "@maber/portfolio", "exec", "vite", "dev", "--port", "5176", "--strictPort"],
       "port": 5176
     },
     {

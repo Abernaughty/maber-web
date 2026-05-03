@@ -1,0 +1,4 @@
+Contact: mailto:mike@maber.io
+Expires: 2027-05-02T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://dev.maber.io/.well-known/security.txt

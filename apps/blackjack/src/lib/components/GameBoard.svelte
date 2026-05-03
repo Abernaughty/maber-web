@@ -23,7 +23,7 @@
 	type GamePhase = 'betting' | 'playing' | 'dealer' | 'resolving';
 
 	let game: GameState = $state(createInitialState());
-	let phase: GamePhase = $state('betting');
+	let phase = $state<GamePhase>('betting');
 	let actionsEnabled = $state(true);
 
 	// Derived state

@@ -1,37 +1,102 @@
 <script lang="ts">
+	/**
+	 * Root layout — mounts the sticky shell (TopBar + Nav), the page slot,
+	 * the Footer, and a single CommandPalette instance whose open state is
+	 * shared via two-way binding with the Nav's ⌘K trigger.
+	 *
+	 * Spec: §3 — TopBar (sticky top:0, z-60) + Nav (sticky top:33px, z-50).
+	 */
+
 	import type { Snippet } from 'svelte';
 	import '../app.css';
+	import TopBar from '$lib/components/TopBar.svelte';
+	import Nav from '$lib/components/Nav.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import { NAME } from '$lib/constants/identity';
+	import { EMAIL } from '$lib/constants/contact';
+	import {
+		OG_IMAGE_URL,
+		OG_IMAGE_WIDTH,
+		OG_IMAGE_HEIGHT,
+		SITE_NAME,
+		SITE_URL,
+		SAME_AS
+	} from '$lib/constants/site';
 
 	let { children }: { children: Snippet } = $props();
+
+	let paletteOpen = $state(false);
+
+	// Cross-route hash scroll: handled by CSS `scroll-padding-top` on `html`
+	// (see app.css). Browsers honor that during native hash navigation so
+	// `#section` lands below the sticky TopBar+Nav rather than under it.
+
+	// JSON-LD Person schema. Built once at module scope so SvelteKit's
+	// CSP hash-mode produces a single stable hash per build. `<` is escaped
+	// to `<` as defense-in-depth against any embedded value ever
+	// closing the script tag prematurely. The closing `</` + `script>` split
+	// keeps Svelte's <script>-block parser from terminating this block early.
+	const personJsonLdBody = JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'Person',
+		name: NAME,
+		jobTitle: 'Cloud & Platform Engineer',
+		url: SITE_URL,
+		email: `mailto:${EMAIL}`,
+		image: OG_IMAGE_URL,
+		worksFor: { '@type': 'Organization', name: 'Independent' },
+		address: {
+			'@type': 'PostalAddress',
+			addressLocality: 'Colorado Springs',
+			addressRegion: 'CO',
+			addressCountry: 'US'
+		},
+		knowsAbout: [
+			'Microsoft Azure',
+			'Terraform',
+			'Kubernetes',
+			'Infrastructure as Code',
+			'DevOps',
+			'Platform Engineering',
+			'SvelteKit',
+			'TypeScript'
+		],
+		sameAs: SAME_AS
+	}).replace(/</g, '\\u003c');
+	const personJsonLdTag =
+		'<script type="application/ld+json">' + personJsonLdBody + '</' + 'script>';
 </script>
 
-<div class="app">
-	<header>
-		<nav class="container">
-			<div class="logo">
-				<a href="/">
-					<img src="/images/mabear-icon.png" alt="Coding Bear" class="logo-icon" />
-					<span>maber.io</span>
-				</a>
-			</div>
-			<ul class="nav-links">
-				<li><a href="#about">About</a></li>
-				<li><a href="#projects">Projects</a></li>
-				<li><a href="#skills">Skills</a></li>
-				<li><a href="#contact">Contact</a></li>
-			</ul>
-		</nav>
-	</header>
+<svelte:head>
+	<!-- Site-wide structural meta. Per-page <svelte:head> blocks override
+	     title / description / og:title / og:description / og:url / canonical. -->
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content={SITE_NAME} />
+	<meta property="og:image" content={OG_IMAGE_URL} />
+	<meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+	<meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+	<meta property="og:image:alt" content="{NAME} — Cloud & Platform Engineer" />
+	<meta property="og:locale" content="en_US" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content={OG_IMAGE_URL} />
+	<meta name="twitter:image:alt" content="{NAME} — Cloud & Platform Engineer" />
+	<meta name="author" content={NAME} />
 
-	<main>
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- whole tag built from controlled values; `<` is escaped in the JSON body. -->
+	{@html personJsonLdTag}
+</svelte:head>
+
+<div class="app">
+	<TopBar />
+	<Nav bind:paletteOpen />
+
+	<main id="top">
 		{@render children()}
 	</main>
 
-	<footer>
-		<div class="container">
-			<p>&copy; {new Date().getFullYear()} - Mike Abernathy. All rights reserved.</p>
-		</div>
-	</footer>
+	<Footer />
+	<CommandPalette bind:open={paletteOpen} />
 </div>
 
 <style>
@@ -41,116 +106,8 @@
 		min-height: 100vh;
 	}
 
-	header {
-		background-color: rgba(30, 30, 30, 0.8);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		padding: var(--space-md) 0;
-		position: sticky;
-		top: 0;
-		z-index: 100;
-	}
-
-	nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.logo a {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: var(--fs-large);
-		font-weight: 700;
-		letter-spacing: -0.5px;
-		transition: filter var(--transition-speed) ease;
-	}
-
-	.logo-icon {
-		height: 32px;
-		width: auto;
-		transition: transform var(--transition-speed) ease;
-	}
-
-	.logo a:hover .logo-icon {
-		transform: rotate(-5deg);
-	}
-
-	.logo a span {
-		background-image: var(--purple-blue-gradient);
-		background-clip: text;
-		-webkit-background-clip: text;
-		color: transparent;
-		background-size: 100% 100%;
-		filter: brightness(1.2);
-		display: inline-block;
-	}
-
-	.logo a:hover {
-		filter: brightness(1.2);
-	}
-
-	.nav-links {
-		display: flex;
-		list-style: none;
-		gap: var(--space-lg);
-		font-weight: var(--fw-medium);
-		letter-spacing: 0.3px;
-	}
-
-	.nav-links a {
-		color: var(--text);
-		transition: color var(--transition-speed) ease;
-		letter-spacing: 0.3px;
-		position: relative;
-	}
-
-	.nav-links a::after {
-		content: '';
-		position: absolute;
-		width: 0;
-		height: 2px;
-		bottom: -4px;
-		left: 0;
-		background: var(--purple-blue-gradient);
-		transition: width var(--transition-speed) ease;
-	}
-
-	.nav-links a:hover {
-		color: #8b5cf6;
-	}
-
-	.nav-links a:hover::after {
-		width: 100%;
-	}
-
 	main {
 		flex: 1;
-	}
-
-	footer {
-		background-color: rgba(30, 30, 30, 0.8);
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(10px);
-		border-top: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-		padding: var(--space-lg) 0;
-		text-align: center;
-	}
-
-	@media (max-width: 768px) {
-		nav {
-			flex-direction: column;
-			gap: var(--space-md);
-		}
-
-		.nav-links {
-			flex-wrap: wrap;
-			justify-content: center;
-			gap: var(--space-md);
-		}
+		/* Reset scroll anchor; sections inside provide their own ids. */
 	}
 </style>

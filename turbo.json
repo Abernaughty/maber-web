@@ -14,7 +14,7 @@
         "CACHE_TTL_SETS",
         "CACHE_TTL_CARDS"
       ],
-      "outputs": [".svelte-kit/**", "build/**", "dist/**"]
+      "outputs": [".svelte-kit/**", ".vercel/output/**", "build/**", "dist/**"]
     },
     "dev": {
       "cache": false,

@@ -1,128 +1,99 @@
-/* TailwindCSS 4 - single import replaces @tailwind directives */
+/**
+ * Portfolio global stylesheet.
+ *
+ * Pattern B (per spec §0.8): tokens + fonts as CSS layers, Tailwind 4 for
+ * structural utilities only (flex, grid, spacing). Visual styling lives in
+ * each component's scoped <style> block consuming var(--token).
+ *
+ * Order matters: fonts and tokens must register before Tailwind so that
+ * utility classes (when used) can reference tokens.
+ */
+
+@import './lib/styles/fonts.css';
+@import './lib/styles/tokens.css';
 @import 'tailwindcss';
 
-/* Import theme and utility styles */
-@import './lib/styles/theme.css';
-@import './lib/styles/utilities.css';
-
-/* Base styles */
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Native hash anchors land below the sticky TopBar+Nav rather than
+     * under them. Smooth-scroll JS uses its own offset; this is only the
+     * fallback path (full-reload + hash, browser-native scroll). */
+    scroll-padding-top: calc(
+      var(--topbar-height) + var(--nav-height) + var(--space-2)
+    );
+  }
+
   html,
   body {
-    height: 100%;
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: var(--lh-normal);
+    min-height: 100%;
+    background-color: var(--bg);
     color: var(--text);
-    background-color: var(--background);
+    font-family: var(--font-sans);
+    font-size: var(--fs-base);
+    line-height: var(--lh-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: var(--fw-bold);
-    line-height: var(--lh-tight);
-    margin-bottom: var(--space-md);
+  /* Inherit text color through the tree by default; components opt out via
+   * their own scoped styles. Mono surface inherits sans color too. */
+  body {
+    overflow-x: hidden;
   }
 
-  h1 { font-size: var(--fs-xxl); }
-  h2 { font-size: var(--fs-xl); }
-  h3 { font-size: var(--fs-large); }
-  h4 { font-size: var(--fs-medium); }
-  h5 { font-size: var(--fs-normal); font-weight: var(--fw-semibold); }
-  h6 { font-size: var(--fs-small); font-weight: var(--fw-semibold); }
+  ::selection {
+    background-color: var(--accent);
+    color: var(--bg);
+  }
 
-  p { margin-bottom: var(--space-md); }
+  /* Reduce motion users get instant transitions, no parallax-style backgrounds. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 
   a {
-    color: var(--primary);
+    color: inherit;
     text-decoration: none;
-    transition: color var(--transition-speed) var(--ease-in-out);
   }
 
-  a:hover { color: var(--secondary); }
-
-  code, pre {
-    font-family: var(--font-mono);
-    font-size: var(--fs-small);
-  }
-}
-
-/* Component styles */
-@layer components {
-  .container {
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    max-width: var(--container-width);
-  }
-
-  .section {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    font-weight: 500;
-    background-color: var(--primary);
-    color: var(--background);
+  button {
+    background: none;
     border: none;
+    color: inherit;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font: inherit;
   }
 
-  .btn:hover {
-    background-color: var(--secondary);
-    color: var(--background);
+  /* Focus ring — high-contrast cyan outline visible on every interactive
+   * element. Use :focus-visible to avoid showing on mouse clicks. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
-  .card {
-    background-color: var(--surface);
-    border-radius: 0.25rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-md);
-  }
-
-  .card-grid {
-    display: grid;
-    gap: var(--space-lg);
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-
-  .card-grid {
-    grid-template-columns: 1fr;
+  img,
+  picture,
+  svg {
+    display: block;
+    max-width: 100%;
   }
 }
