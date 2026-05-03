@@ -22,6 +22,13 @@ export const TAGLINE = 'Cloud & Platform Engineer · Azure · IaC · DevOps';
 export const STACK_LINE =
 	'azure · terraform · kubernetes · sveltekit · python · typescript';
 
+/**
+ * Narrative beat — Phase 2 addition (spec §9.2). Closes the typed sequence
+ * with a single line of arc: where I came from, what I'm doing now.
+ */
+export const STORY_LINE =
+	'built support muscle at microsoft. now shipping cloud infrastructure end to end.';
+
 export const LOCATION = 'remote · colorado springs, co';
 
 export const AVAILABILITY = 'open to work';

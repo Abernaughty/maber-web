@@ -20,17 +20,25 @@
 
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { NAME_FIRST, NAME_LAST, TAGLINE, STACK_LINE } from '$lib/constants/identity';
+	import {
+		NAME_FIRST,
+		NAME_LAST,
+		TAGLINE,
+		STACK_LINE,
+		STORY_LINE
+	} from '$lib/constants/identity';
 	import { useTyping } from '$lib/hooks/useTyping.svelte';
 	import { smoothScrollHandler } from '$lib/hooks/useSmoothScroll.svelte';
 	import Caret from './Caret.svelte';
 	import TerminalPrompt from './TerminalPrompt.svelte';
 	import GhDashboard from './GhDashboard/GhDashboard.svelte';
 
-	// Typed lines stagger by ~600ms each so the sequence reads as a terminal
-	// session rather than three streams typing in parallel.
+	// Typed lines stagger so the sequence reads as a terminal session rather
+	// than parallel streams. Story uses a slightly slower charDelay so the
+	// narrative beat lands with weight rather than racing past.
 	const tagline = useTyping(TAGLINE, { startDelay: 400, charDelay: 22 });
 	const stack = useTyping(STACK_LINE, { startDelay: 1800, charDelay: 18 });
+	const story = useTyping(STORY_LINE, { startDelay: 3400, charDelay: 20 });
 
 	// Name reveal is not character-typed — it pops in cleanly at load. The
 	// "$ whoami" prompt above it is part of the static layout.
@@ -73,6 +81,12 @@
 			<TerminalPrompt cmd="ls ~/stack" />
 			<span class="stack">{stack.text}</span>
 			{#if stack.text.length > 0 && !stack.done}<Caret color="var(--text)" solid />{/if}
+		</div>
+
+		<div class="line story-line">
+			<TerminalPrompt cmd="cat /etc/story" />
+			<span class="story">{story.text}</span>
+			{#if story.text.length > 0 && !story.done}<Caret color="var(--text)" solid />{/if}
 		</div>
 
 		<div class="ctas">
@@ -210,6 +224,11 @@
 	}
 
 	.stack {
+		color: var(--muted);
+		font-family: var(--font-mono);
+	}
+
+	.story {
 		color: var(--muted);
 		font-family: var(--font-mono);
 	}
