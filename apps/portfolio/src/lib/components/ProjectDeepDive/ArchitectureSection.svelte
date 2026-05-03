@@ -67,7 +67,7 @@
 
 	<div class="diagram-wrap" bind:this={containerEl}>
 		{#if renderedSvg}
-			<!-- Mermaid SVG is generated locally from a constant — safe to inject. -->
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -- Mermaid SVG is generated locally from a constant — safe to inject. -->
 			{@html renderedSvg}
 		{:else if renderError}
 			<pre class="fallback" aria-label="Mermaid render failed; showing source">{diagram}</pre>

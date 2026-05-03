@@ -32,11 +32,12 @@
 	// (see app.css). Browsers honor that during native hash navigation so
 	// `#section` lands below the sticky TopBar+Nav rather than under it.
 
-	// JSON-LD Person schema. Stringified once at module scope so SvelteKit's
-	// CSP hash-mode produces a single stable hash per build. The `</`
-	// replacement defends against an embedded value ever closing the script
-	// tag prematurely — defense-in-depth for inline JSON-LD.
-	const personJsonLd = JSON.stringify({
+	// JSON-LD Person schema. Built once at module scope so SvelteKit's
+	// CSP hash-mode produces a single stable hash per build. `<` is escaped
+	// to `<` as defense-in-depth against any embedded value ever
+	// closing the script tag prematurely. The closing `</` + `script>` split
+	// keeps Svelte's <script>-block parser from terminating this block early.
+	const personJsonLdBody = JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'Person',
 		name: NAME,
@@ -63,6 +64,8 @@
 		],
 		sameAs: SAME_AS
 	}).replace(/</g, '\\u003c');
+	const personJsonLdTag =
+		'<script type="application/ld+json">' + personJsonLdBody + '</' + 'script>';
 </script>
 
 <svelte:head>
@@ -80,7 +83,8 @@
 	<meta name="twitter:image:alt" content="{NAME} — Cloud & Platform Engineer" />
 	<meta name="author" content={NAME} />
 
-	{@html `<script type="application/ld+json">${personJsonLd}</script>`}
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- whole tag built from controlled values; `<` is escaped in the JSON body. -->
+	{@html personJsonLdTag}
 </svelte:head>
 
 <div class="app">

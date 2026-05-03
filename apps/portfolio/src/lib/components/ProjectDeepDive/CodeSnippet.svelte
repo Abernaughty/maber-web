@@ -24,7 +24,7 @@
 		<p class="caption">{snippet.caption}</p>
 	</header>
 	<div class="code-wrap">
-		<!-- Shiki HTML is generated from a constant at SSR time — safe to inject. -->
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- Shiki HTML is generated from a constant at SSR time — safe to inject. -->
 		{@html html}
 	</div>
 	{#if snippet.sourceUrl}
