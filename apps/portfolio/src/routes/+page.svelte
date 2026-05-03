@@ -14,6 +14,7 @@
 	 */
 
 	import { NAME, TAGLINE } from '$lib/constants/identity';
+	import { SITE_DESCRIPTION, SITE_URL } from '$lib/constants/site';
 	import Hero from '$lib/components/Hero.svelte';
 	import WorkSection from '$lib/components/WorkSection.svelte';
 	import NowSection from '$lib/components/NowSection.svelte';
@@ -22,11 +23,19 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	const pageTitle = `${NAME} — ${TAGLINE}`;
 </script>
 
 <svelte:head>
-	<title>{NAME} — {TAGLINE}</title>
-	<meta name="description" content={TAGLINE} />
+	<title>{pageTitle}</title>
+	<meta name="description" content={SITE_DESCRIPTION} />
+	<link rel="canonical" href={SITE_URL} />
+	<meta property="og:title" content={pageTitle} />
+	<meta property="og:description" content={SITE_DESCRIPTION} />
+	<meta property="og:url" content={SITE_URL} />
+	<meta name="twitter:title" content={pageTitle} />
+	<meta name="twitter:description" content={SITE_DESCRIPTION} />
 </svelte:head>
 
 <Hero gh={data.gh} />
