@@ -34,7 +34,7 @@
 	<button class="header" type="button" onclick={toggle} aria-expanded={expanded}>
 		<span class="number">{project.number}</span>
 		<span class="title-block">
-			<span class="title">{project.title}</span>
+			<h3 class="title">{project.title}</h3>
 			<span class="blurb">{project.blurb}</span>
 			<ul class="stack">
 				{#each project.stack as tech (tech)}
@@ -118,6 +118,7 @@
 	}
 
 	.title {
+		margin: 0;
 		font-family: var(--font-sans);
 		font-size: var(--fs-lg);
 		font-weight: var(--fw-semibold);
