@@ -21,7 +21,15 @@
 			built with <span class="accent">sveltekit</span>
 			<span class="separator">·</span>
 			hosted on <span class="accent">vercel</span>
-			<!-- Phase 4 will append: · A+ securityheaders.com → -->
+			<span class="separator">·</span>
+			<a
+				class="badge"
+				href="https://securityheaders.com/?q=dev.maber.io&followRedirects=on"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				A+ securityheaders.com →
+			</a>
 		</span>
 		<span class="right">
 			© {year} mike abernathy
@@ -69,6 +77,16 @@
 
 	.accent {
 		color: var(--accent-dim);
+	}
+
+	.badge {
+		color: var(--accent-dim);
+		text-decoration: none;
+		transition: color var(--transition-fast);
+	}
+
+	.badge:hover {
+		color: var(--accent);
 	}
 
 	.separator {
