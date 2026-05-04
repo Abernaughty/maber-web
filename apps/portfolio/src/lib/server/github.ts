@@ -22,6 +22,17 @@ const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql';
 const GITHUB_REST_BASE = 'https://api.github.com';
 const USER_AGENT = 'maber-web-portfolio/1.0 (+https://dev.maber.io)';
 
+// Curated featured repos for the Top Repos card. Order is preserved in the
+// rendered list. Update this array to swap, add, or remove repos — query
+// builder + response shape adapt automatically.
+const FEATURED_REPOS = [
+	'PCPC',
+	'maber-web',
+	'agent-dev',
+	'code-vector-sync',
+	'mom-cloud'
+] as const;
+
 export interface GhUser {
 	login: string;
 	repoCount: number;
@@ -38,7 +49,6 @@ export interface GhRepo {
 	name: string;
 	description: string | null;
 	url: string;
-	stars: number;
 	language: { name: string; color: string } | null;
 }
 
@@ -69,6 +79,32 @@ export type GhFetchResult =
 	| { ok: true; data: GhDashboardData }
 	| { ok: false; error: string };
 
+const REPO_FIELDS_FRAGMENT = /* GraphQL */ `
+	fragment RepoFields on Repository {
+		name
+		description
+		url
+		primaryLanguage {
+			name
+			color
+		}
+		languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+			edges {
+				size
+				node {
+					name
+					color
+				}
+			}
+		}
+	}
+`;
+
+const FEATURED_REPO_LOOKUPS = FEATURED_REPOS.map(
+	(name, i) =>
+		`repo${i}: repository(owner: "${GITHUB_LOGIN}", name: "${name}") { ...RepoFields }`
+).join('\n\t\t');
+
 const QUERY = /* GraphQL */ `
 	query GhDashboard($login: String!) {
 		user(login: $login) {
@@ -91,36 +127,22 @@ const QUERY = /* GraphQL */ `
 				}
 			}
 		}
-		topRepos: user(login: $login) {
-			repositories(
-				first: 4
-				privacy: PUBLIC
-				isFork: false
-				orderBy: { field: STARGAZERS, direction: DESC }
-			) {
-				nodes {
-					name
-					description
-					url
-					stargazerCount
-					primaryLanguage {
-						name
-						color
-					}
-					languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
-						edges {
-							size
-							node {
-								name
-								color
-							}
-						}
-					}
-				}
-			}
-		}
+		${FEATURED_REPO_LOOKUPS}
 	}
+	${REPO_FIELDS_FRAGMENT}
 `;
+
+interface RepoNode {
+	name: string;
+	description: string | null;
+	url: string;
+	primaryLanguage: { name: string; color: string } | null;
+	languages: {
+		edges: { size: number; node: { name: string; color: string | null } }[];
+	};
+}
+
+type FeaturedReposResponse = Record<`repo${number}`, RepoNode | null>;
 
 interface GraphqlResponse {
 	data?: {
@@ -140,21 +162,7 @@ interface GraphqlResponse {
 				};
 			};
 		};
-		topRepos: {
-			repositories: {
-				nodes: {
-					name: string;
-					description: string | null;
-					url: string;
-					stargazerCount: number;
-					primaryLanguage: { name: string; color: string } | null;
-					languages: {
-						edges: { size: number; node: { name: string; color: string | null } }[];
-					};
-				}[];
-			};
-		};
-	};
+	} & FeaturedReposResponse;
 	errors?: { message: string }[];
 }
 
@@ -166,8 +174,8 @@ interface RestEvent {
 		commits?: { message: string }[];
 		ref_type?: string;
 		ref?: string | null;
-		pull_request?: { title: string; number: number };
-		issue?: { title: string; number: number };
+		pull_request?: { title?: string; number: number };
+		issue?: { title?: string; number: number };
 		action?: string;
 	};
 }
@@ -249,15 +257,18 @@ function shapeData(
 			}))
 	);
 
-	const topRepos: GhRepo[] = gql.topRepos.repositories.nodes.map((repo) => ({
+	const repoNodes: RepoNode[] = FEATURED_REPOS.map((_, i) => gql[`repo${i}`]).filter(
+		(node): node is RepoNode => node !== null && node !== undefined
+	);
+
+	const topRepos: GhRepo[] = repoNodes.map((repo) => ({
 		name: repo.name,
 		description: repo.description,
 		url: repo.url,
-		stars: repo.stargazerCount,
 		language: repo.primaryLanguage
 	}));
 
-	const languages = aggregateLanguages(gql.topRepos.repositories.nodes);
+	const languages = aggregateLanguages(repoNodes);
 	const recentActivity = filterEvents(events);
 
 	return {
@@ -274,9 +285,7 @@ function shapeData(
 	};
 }
 
-function aggregateLanguages(
-	repos: NonNullable<GraphqlResponse['data']>['topRepos']['repositories']['nodes']
-): GhLanguage[] {
+function aggregateLanguages(repos: RepoNode[]): GhLanguage[] {
 	const totals = new Map<string, { bytes: number; color: string }>();
 
 	for (const repo of repos) {
@@ -339,14 +348,16 @@ function messageFor(ev: RestEvent): string {
 			// Commits often have multi-line bodies; keep the subject only.
 			return commit.split('\n', 1)[0];
 		}
-		case 'PullRequestEvent':
-			return ev.payload.pull_request
-				? `#${ev.payload.pull_request.number} ${ev.payload.pull_request.title}`
-				: '';
-		case 'IssuesEvent':
-			return ev.payload.issue
-				? `#${ev.payload.issue.number} ${ev.payload.issue.title}`
-				: '';
+		case 'PullRequestEvent': {
+			const pr = ev.payload.pull_request;
+			if (!pr) return '';
+			return pr.title ? `#${pr.number} ${pr.title}` : `#${pr.number}`;
+		}
+		case 'IssuesEvent': {
+			const issue = ev.payload.issue;
+			if (!issue) return '';
+			return issue.title ? `#${issue.number} ${issue.title}` : `#${issue.number}`;
+		}
 		case 'CreateEvent':
 			return ev.payload.ref_type === 'repository'
 				? 'created repository'
