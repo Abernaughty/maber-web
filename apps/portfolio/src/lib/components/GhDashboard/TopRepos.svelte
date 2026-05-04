@@ -1,8 +1,11 @@
 <script lang="ts">
 	/**
-	 * Top repos card — 4 repo rows showing name, description, primary
-	 * language dot, and star count. When `repos` is null, falls back to
-	 * skeleton placeholders.
+	 * Top repos card — featured repo rows showing name, description, and
+	 * primary language dot. When `repos` is null, falls back to skeleton
+	 * placeholders.
+	 *
+	 * Language dot uses inline SVG `fill` (not CSS `style:`) so the strict
+	 * CSP `style-src 'self'` allows the runtime color.
 	 *
 	 * Spec: §4 Modules → Top repos card.
 	 */
@@ -16,7 +19,7 @@
 
 	const { repos }: Props = $props();
 
-	const ROW_COUNT = 4;
+	const ROW_COUNT = 5;
 </script>
 
 <div class="card">
@@ -38,17 +41,22 @@
 					{#if repo.description}
 						<p class="desc">{repo.description}</p>
 					{/if}
-					<div class="meta">
-						{#if repo.language}
+					{#if repo.language}
+						<div class="meta">
 							<span class="lang">
-								<span class="lang-dot" style:background={repo.language.color}></span>
+								<svg
+									class="lang-dot"
+									width="8"
+									height="8"
+									viewBox="0 0 8 8"
+									aria-hidden="true"
+								>
+									<circle cx="4" cy="4" r="4" fill={repo.language.color} />
+								</svg>
 								{repo.language.name}
 							</span>
-						{/if}
-						<span class="stars" aria-label={`${repo.stars} stars`}>
-							★ {repo.stars}
-						</span>
-					</div>
+						</div>
+					{/if}
 				</li>
 			{/each}
 		{:else}
@@ -58,7 +66,6 @@
 					<Skeleton width="100%" height="0.8em" />
 					<div class="meta">
 						<Skeleton width="60px" height="0.7em" />
-						<Skeleton width="40px" height="0.7em" />
 					</div>
 				</li>
 			{/each}
@@ -138,12 +145,6 @@
 	}
 
 	.lang-dot {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-	}
-
-	.stars {
-		color: var(--dim);
+		flex-shrink: 0;
 	}
 </style>
