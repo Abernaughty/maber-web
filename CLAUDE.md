@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a monorepo containing Michael Abernathy's web projects, managed with pnpm workspaces and Turbo. All apps are SvelteKit applications deployed to Vercel.
+This is a monorepo containing Michael Abernathy's personal web projects, managed with pnpm workspaces and Turbo. All apps are SvelteKit applications deployed to Vercel.
+
+The Pokémon Card Price Checker (PCPC) used to live here as `apps/pcpc/` but has moved to its own repository at [`Abernaughty/PCPC`](https://github.com/Abernaughty/PCPC) so it can be deployed three ways from a single consolidated codebase. See [`docs/PORTFOLIO_PLAN.md`](docs/PORTFOLIO_PLAN.md) for context (this is a temporary mirror — the canonical version lives in `Abernaughty/PCPC`).
 
 ## Apps
 
 - **landing** (`apps/landing/`) - Main landing page
-- **pcpc** (`apps/pcpc/`) - Pokémon Card Price Checker with Azure Cosmos DB and Redis integration
 - **blackjack** (`apps/blackjack/`) - Blackjack game implementation
 - **portfolio** (`apps/portfolio/`) - Portfolio site
 
@@ -43,12 +44,6 @@ pnpm check                # Run svelte-check
 pnpm lint                 # Run ESLint
 ```
 
-### PCPC-specific
-```bash
-cd apps/pcpc
-pnpm test                 # Run Vitest tests
-```
-
 ## Architecture
 
 ### Tech Stack
@@ -59,20 +54,11 @@ pnpm test                 # Run Vitest tests
 - **Package Manager**: pnpm with workspaces
 - **Build Tool**: Turbo for monorepo orchestration
 
-### PCPC Architecture
-- **Frontend**: SvelteKit with server-side rendering
-- **Backend Services**:
-  - Azure Cosmos DB for card and set data storage
-  - Redis for caching (optional)
-  - Integration with PokeData and Pokemon TCG APIs
-- **Environment Variables**: Configure in `.env` (see `apps/pcpc/.env.example`)
-
 ### Project Structure
 ```
 maber-web/
 ├── apps/               # Individual applications
 │   ├── landing/
-│   ├── pcpc/
 │   ├── blackjack/
 │   └── portfolio/
 ├── packages/          # Shared packages
@@ -81,14 +67,6 @@ maber-web/
 │   └── utils/       # Utilities
 └── turbo.json       # Turbo pipeline configuration
 ```
-
-## Environment Setup
-
-For PCPC app, create `.env` from `.env.example`:
-- Azure Cosmos DB connection details
-- Redis connection (optional)
-- API keys for PokeData and Pokemon TCG APIs
-- Cache TTL configurations
 
 ## CI/CD
 
