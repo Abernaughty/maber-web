@@ -35,4 +35,4 @@ Asset variants change once every several months at most. Adding a 10 MB+ native 
 | WebP   | ~100 KB | ~5%  |
 | AVIF   | ~57 KB  | ~3%  |
 
-Settings: WebP quality 85 + effort 6, AVIF quality 55 + effort 6. See [Portfolio_Redesign_Spec.md §0.9](../docs/specs/Portfolio_Redesign_Spec.md).
+Settings: WebP quality 85 + effort 6, AVIF quality 55 + effort 6.
