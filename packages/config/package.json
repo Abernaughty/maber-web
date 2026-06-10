@@ -2,6 +2,7 @@
   "name": "@maber/config",
   "version": "0.0.1",
   "private": true,
+  "license": "MIT",
   "exports": {
     "./tailwind": "./tailwind/preset.js",
     "./eslint": "./eslint/index.js",
