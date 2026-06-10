@@ -1,6 +1,9 @@
 import pkg from 'redis';
+import { createContextLogger } from '$lib/services/logger';
 const { createClient } = pkg;
 type RedisClientType = ReturnType<typeof createClient>;
+
+const log = createContextLogger('RedisCacheService');
 
 export interface IRedisCacheService {
   get<T>(key: string): Promise<T | null>;
@@ -27,29 +30,26 @@ export class RedisCacheService implements IRedisCacheService {
 
   private async initialize(): Promise<void> {
     try {
-      console.log('[RedisCacheService] Initializing Redis connection...');
-
       this.client = createClient({
         url: this.connectionString,
       });
 
       this.client.on('error', (err) => {
-        console.error('[RedisCacheService] Redis error:', err);
+        log.error('Redis error:', err);
         this.enabled = false;
       });
 
       this.client.on('connect', () => {
-        console.log('[RedisCacheService] Connected to Redis');
+        log.info('Connected to Redis');
       });
 
       this.client.on('disconnect', () => {
-        console.warn('[RedisCacheService] Disconnected from Redis');
+        log.warn('Disconnected from Redis');
       });
 
       await this.client.connect();
-      console.log('[RedisCacheService] Redis connection established');
     } catch (error) {
-      console.warn('[RedisCacheService] Failed to initialize Redis:', error);
+      log.warn('Failed to initialize Redis, caching disabled:', error);
       this.enabled = false;
       this.client = null;
     }
@@ -68,7 +68,7 @@ export class RedisCacheService implements IRedisCacheService {
 
       return JSON.parse(value) as T;
     } catch (error) {
-      console.warn(`[RedisCacheService] Error getting key ${key}:`, error);
+      log.warn(`Error getting key ${key}:`, error);
       return null;
     }
   }
@@ -86,10 +86,8 @@ export class RedisCacheService implements IRedisCacheService {
       } else {
         await this.client.set(key, serialized);
       }
-
-      console.log(`[RedisCacheService] Cached key ${key}${ttlSeconds ? ` (TTL: ${ttlSeconds}s)` : ''}`);
     } catch (error) {
-      console.warn(`[RedisCacheService] Error setting key ${key}:`, error);
+      log.warn(`Error setting key ${key}:`, error);
     }
   }
 
@@ -100,9 +98,8 @@ export class RedisCacheService implements IRedisCacheService {
 
     try {
       await this.client.del(key);
-      console.log(`[RedisCacheService] Deleted key ${key}`);
     } catch (error) {
-      console.warn(`[RedisCacheService] Error deleting key ${key}:`, error);
+      log.warn(`Error deleting key ${key}:`, error);
     }
   }
 
@@ -115,7 +112,7 @@ export class RedisCacheService implements IRedisCacheService {
       const exists = await this.client.exists(key);
       return exists === 1;
     } catch (error) {
-      console.warn(`[RedisCacheService] Error checking key existence ${key}:`, error);
+      log.warn(`Error checking key existence ${key}:`, error);
       return false;
     }
   }
@@ -127,9 +124,9 @@ export class RedisCacheService implements IRedisCacheService {
 
     try {
       await this.client.flushDb();
-      console.log('[RedisCacheService] Cache cleared');
+      log.info('Cache cleared');
     } catch (error) {
-      console.warn('[RedisCacheService] Error clearing cache:', error);
+      log.warn('Error clearing cache:', error);
     }
   }
 
@@ -142,7 +139,7 @@ export class RedisCacheService implements IRedisCacheService {
       await this.client.disconnect();
       this.client = null;
       this.enabled = false;
-      console.log('[RedisCacheService] Disconnected from Redis');
+      log.info('Disconnected from Redis');
     }
   }
 }

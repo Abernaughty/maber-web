@@ -142,7 +142,7 @@ export function prepareGroupedSetsForDropdown(
     return newestB - newestA; // newest group first
   });
 
-  log.info(
+  log.debug(
     `Prepared ${groups.length} expansion groups: ${groups.map(g => `${g.label} (${g.items.length})`).join(', ')}`
   );
 
