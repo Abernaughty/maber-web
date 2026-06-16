@@ -2,12 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "pcpc (dev)",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@maber/pcpc", "dev", "--", "--port", "5173"],
-      "port": 5173
-    },
-    {
       "name": "blackjack (dev)",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@maber/blackjack", "dev", "--", "--port", "5174"],

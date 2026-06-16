@@ -9,9 +9,10 @@ This is a monorepo containing Michael Abernathy's web projects, managed with pnp
 ## Apps
 
 - **landing** (`apps/landing/`) - Main landing page
-- **pcpc** (`apps/pcpc/`) - Pokémon Card Price Checker with Azure Cosmos DB and Redis integration
 - **blackjack** (`apps/blackjack/`) - Blackjack game implementation
 - **portfolio** (`apps/portfolio/`) - Portfolio site
+
+> **Not in this repo — Pokémon Card Price Checker (`pcpc.maber.io`):** The price checker lives in its own repository, [Abernaughty/PCPC](https://github.com/Abernaughty/PCPC), as a multi-backend showcase (SvelteKit BFF on Vercel + Azure API Management / Functions / Container Apps, Terraform IaC). It was originally developed here under `apps/pcpc` and was consolidated into that repo, which owns its deployment to `pcpc.maber.io`. **Changes to the price checker — including its SvelteKit frontend — belong in `Abernaughty/PCPC` (frontend lives under `frontend/`), not here.**
 
 ## Shared Packages
 
@@ -43,12 +44,6 @@ pnpm check                # Run svelte-check
 pnpm lint                 # Run ESLint
 ```
 
-### PCPC-specific
-```bash
-cd apps/pcpc
-pnpm test                 # Run Vitest tests
-```
-
 ## Architecture
 
 ### Tech Stack
@@ -59,20 +54,11 @@ pnpm test                 # Run Vitest tests
 - **Package Manager**: pnpm with workspaces
 - **Build Tool**: Turbo for monorepo orchestration
 
-### PCPC Architecture
-- **Frontend**: SvelteKit with server-side rendering
-- **Backend Services**:
-  - Azure Cosmos DB for card and set data storage
-  - Redis for caching (optional)
-  - Integration with PokeData and Pokemon TCG APIs
-- **Environment Variables**: Configure in `.env` (see `apps/pcpc/.env.example`)
-
 ### Project Structure
 ```
 maber-web/
 ├── apps/               # Individual applications
 │   ├── landing/
-│   ├── pcpc/
 │   ├── blackjack/
 │   └── portfolio/
 ├── packages/          # Shared packages
@@ -81,14 +67,6 @@ maber-web/
 │   └── utils/       # Utilities
 └── turbo.json       # Turbo pipeline configuration
 ```
-
-## Environment Setup
-
-For PCPC app, create `.env` from `.env.example`:
-- Azure Cosmos DB connection details
-- Redis connection (optional)
-- API keys for PokeData and Pokemon TCG APIs
-- Cache TTL configurations
 
 ## CI/CD
 
